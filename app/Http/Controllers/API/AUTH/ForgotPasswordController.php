@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\API\AUTH;
 
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ForgotPasswordRequest;
 use App\Jobs\ForgotPasswordJob;
-use App\Repositories\OtpRepository;
+use App\Repositories\{OtpRepository, UserRepository};
 use App\Services\OtpService;
-use App\Repositories\UserRepository;
-use Illuminate\Support\Str;
 
 class ForgotPasswordController extends Controller
 {
