@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class VerifyOtpRequest extends FormRequest
@@ -25,14 +25,15 @@ class VerifyOtpRequest extends FormRequest
     {
         return [
             'identifier' => 'required|string',
-            'otp'=> 'required|string|max:4',
+            'otp' => 'required|string|max:4',
         ];
     }
+
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
             'status' => 'Error',
-            'errors' => $validator->errors()
+            'errors' => $validator->errors(),
         ], 422));
     }
 }

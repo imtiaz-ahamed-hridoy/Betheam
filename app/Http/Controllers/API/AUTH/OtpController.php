@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API\AUTH;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\VerifyOtpRequest;
 use App\Http\Requests\ResendOtpRequest;
+use App\Http\Requests\VerifyOtpRequest;
 use App\Repositories\OtpRepository;
 use App\Services\OtpService;
 
@@ -32,10 +32,11 @@ class OtpController extends Controller
 
         $otp = $this->otpService->resendOtp($user);
         $otpStillValid = $user->otp_expires_at && now()->lessThan($user->otp_expires_at);
+
         return response()->json([
             'status' => 'Success',
-             'message' => $otpStillValid 
-            ? 'OTP is still active and has not expired.' 
+            'message' => $otpStillValid
+            ? 'OTP is still active and has not expired.'
             : 'A new OTP has been generated and sent successfully.',
             'data' => [
                 'otp_expires_at' => $user->otp_expires_at,
@@ -43,34 +44,30 @@ class OtpController extends Controller
             ],
         ]);
 
-      
     }
 
-     public function otpVerify(VerifyOtpRequest $verifyOtpRequest){
+    public function otpVerify(VerifyOtpRequest $verifyOtpRequest)
+    {
 
-            $user = $this->otpRepo->findUsersByLogin($verifyOtpRequest->identifier);
+        $user = $this->otpRepo->findUsersByLogin($verifyOtpRequest->identifier);
 
-             if (!$user) {
+        if (! $user) {
 
             return response()->json(['status' => 'Error', 'message' => 'User not found.'], 404);
         }
-        
+
         $isVerify = $this->otpService->verifyOtp($user, $verifyOtpRequest->otp);
 
-        if(!$isVerify){
-             return response()->json(['status' => 'Error', 'message' => 'Invalid or expired OTP.'], 422);
+        if (! $isVerify) {
+            return response()->json(['status' => 'Error', 'message' => 'Invalid or expired OTP.'], 422);
         }
-
 
         $user->update(['email_verified_at' => now()]);
 
         return response()->json([
-            'status'=> 'Success',
-            'message' => 'Email verified successfully. Redirect to dashboard.'
+            'status' => 'Success',
+            'message' => 'Email verified successfully. Redirect to dashboard.',
         ]);
 
-
-
-        
-       }
+    }
 }

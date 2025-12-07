@@ -16,7 +16,7 @@ use App\Http\Controllers\API\AUTH\OtpController;
 Route::post('/register', [RegisterController::class, 'store']);
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LogoutController::class, 'logout'])->middleware('auth:sanctum');
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetOtp']);
 Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
 
 Route::post('/otp/verify',[OtpController::class,'otpVerify']);

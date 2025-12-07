@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class UserConfirm extends Mailable
+class ForgotPassword extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -27,7 +27,7 @@ class UserConfirm extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Email Confirmation',
+            subject: 'Forget Password OTP sent',
         );
     }
 
@@ -37,7 +37,7 @@ class UserConfirm extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.userConfirmation',
+            view: 'mail.ForgotPassword',
         );
     }
 

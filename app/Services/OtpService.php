@@ -25,9 +25,7 @@ class OtpService
         $otp = str_pad(random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
 
         $this->otpRepo->otpUpdate($user, $otp);
-
-        SendOtpEmailJob::dispatch($user, $otp);
-
+        
         return $otp;
     }
 

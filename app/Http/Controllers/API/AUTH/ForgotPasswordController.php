@@ -3,29 +3,45 @@
 namespace App\Http\Controllers\API\AUTH;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
+use App\Http\Requests\ForgotPasswordRequest;
+use App\Jobs\ForgotPasswordJob;
+use App\Repositories\OtpRepository;
+use App\Services\OtpService;
 
 class ForgotPasswordController extends Controller
 {
-    public function sendResetLink(Request $request){
+    protected $otpRepo;
 
+    protected $otpService;
 
-        // Send reset link token
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+    public function __construct(OtpRepository $otpRepo, OtpService $otpService)
+    {
+        $this->otpRepo = $otpRepo;
+        $this->otpService = $otpService;
+    }
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json([
-                'status' => 'Success',
-                'message' => 'Password reset link sent successfully.'
-            ], 200);
+    public function sendResetOtp(ForgotPasswordRequest $forgotPasswordRequest)
+    {
+
+        $user = $this->otpRepo->findUsersByLogin($forgotPasswordRequest->email);
+
+        if (! $user) {
+
+            return response()->json(['status' => 'Error', 'message' => 'User not found.'], 404);
         }
 
+        $otp = $this->otpService->generateOtp($user);
+
+        ForgotPasswordJob::dispatch($user);
+
         return response()->json([
-            'status' => 'Error',
-            'message' => __($status)
-        ], 400);
+            'status' => 'Success',
+            'message' => 'A password reset OTP has been sent to your email.',
+            'data' => [
+                'otp_expires_at' => $user->otp_expires_at,
+                'otp' => $otp, // Return the OTP for the client to use
+            ],
+        ]);
+
     }
 }

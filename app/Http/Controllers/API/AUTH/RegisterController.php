@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\AUTH;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
+use App\Jobs\SendOtpEmailJob;
 use App\Services\RegisterService;
 
 class RegisterController extends Controller
@@ -22,6 +23,8 @@ class RegisterController extends Controller
 
         // Pass to service
         $user = $this->registerService->registerUser($validatedData);
+
+        SendOtpEmailJob::dispatch($user, $user->otp);
 
         return response()->json([
             'status' => 'Success',

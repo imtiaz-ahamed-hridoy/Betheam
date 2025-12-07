@@ -2,17 +2,17 @@
 
 namespace App\Jobs;
 
-use App\Mail\UserConfirm;
+use App\Mail\ForgotPassword;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class SendOtpEmailJob implements ShouldQueue
+class ForgotPasswordJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -32,7 +32,7 @@ class SendOtpEmailJob implements ShouldQueue
     public function handle(): void
     {
         try {
-            Mail::to($this->user->email)->send(new UserConfirm($this->user));
+            Mail::to($this->user->email)->send(new ForgotPassword($this->user));
         } catch (\Throwable $e) {
             Log::error('Forget OTP sent mail failed', ['user_id' => $this->user->id, 'error' => $e->getMessage()]);
             throw $e;

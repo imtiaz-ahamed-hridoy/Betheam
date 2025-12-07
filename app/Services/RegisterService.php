@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Repositories\UserRepository;
 use App\Services\OtpService;
+use App\Jobs\SendOtpEmailJob;
 
 class RegisterService
 {
@@ -25,7 +26,9 @@ class RegisterService
      * @return User
      */
     public function registerUser(array $data): User
-    {
+   { 
+    
+    try {
         // Create the user
         $user = $this->userRepo->create([
             'name' => $data['name'],
@@ -36,12 +39,18 @@ class RegisterService
             'phone' => $data['phone'],
             'password' => Hash::make($data['password']),
             'settings' => $data['settings'] ?? null,
-            'otp_verified' => false, // ensure OTP is not verified on creation
+            'otp_verified' => false,
         ]);
 
         // Generate OTP and send to user's email
         $this->otpService->generateOtp($user);
 
         return $user;
+
+        
+    } catch (\Exception $e) {
+        throw new \Exception('User registration failed: ' . $e->getMessage());
+    }
+
     }
 }
