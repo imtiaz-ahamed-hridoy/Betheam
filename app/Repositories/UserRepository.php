@@ -21,9 +21,10 @@ public function update(array $data)
         return User::update($data);
 
 }
-public function resetPasswordToken(User $user, $token)
+public function resetPasswordToken(User $user, $token,$tokenExpiresAt)
 {
     $user->reset_password_token = $token;
+    $user->reset_password_token_expires_at = $tokenExpiresAt;
     $user->save();
     
 }

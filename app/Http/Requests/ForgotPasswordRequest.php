@@ -25,6 +25,7 @@ class ForgotPasswordRequest extends FormRequest
     {
         return [
             'email' => 'required|email|exists:users,email',
+            'otp_code' => 'required|string|max:4',
         ];
     }
 

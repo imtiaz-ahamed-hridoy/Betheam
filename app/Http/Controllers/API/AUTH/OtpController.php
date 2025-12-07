@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\API\AUTH;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ResendOtpRequest;
-use App\Http\Requests\VerifyOtpRequest;
+use App\Http\Requests\{ResendOtpRequest, VerifyOtpRequest};
 use App\Repositories\OtpRepository;
 use App\Services\OtpService;
 
@@ -33,16 +32,16 @@ class OtpController extends Controller
         $otp = $this->otpService->resendOtp($user);
         $otpStillValid = $user->otp_expires_at && now()->lessThan($user->otp_expires_at);
 
-        return response()->json([
-            'status' => 'Success',
-            'message' => $otpStillValid
-            ? 'OTP is still active and has not expired.'
-            : 'A new OTP has been generated and sent successfully.',
-            'data' => [
-                'otp_expires_at' => $user->otp_expires_at,
-                'otp' => $otp, // Return the OTP for the client to use
-            ],
-        ]);
+      return response()->json([
+    'status' => 'Success',
+    'message' => $otpStillValid
+        ? 'OTP is still active and has not expired.'
+        : 'A new OTP has been generated and sent successfully.',
+    'data' => [
+        'otp_expires_at' => $user->otp_expires_at,
+        'otp' => $otp,
+    ],
+]);
 
     }
 

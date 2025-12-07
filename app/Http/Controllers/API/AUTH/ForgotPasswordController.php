@@ -7,31 +7,42 @@ use App\Http\Requests\ForgotPasswordRequest;
 use App\Jobs\ForgotPasswordJob;
 use App\Repositories\OtpRepository;
 use App\Services\OtpService;
+use App\Repositories\UserRepository;
+use Illuminate\Support\Str;
 
 class ForgotPasswordController extends Controller
 {
-    protected OtpRepository $otpRepo;
     protected OtpService $otpService;
+    protected OtpRepository $otpRepo;
+    protected UserRepository $userRepo;
 
-    public function __construct(OtpRepository $otpRepo, OtpService $otpService)
-    {
-        $this->otpRepo = $otpRepo;
+    public function __construct(
+        OtpService $otpService,
+        OtpRepository $otpRepo,
+        UserRepository $userRepo
+    ) {
         $this->otpService = $otpService;
+        $this->otpRepo = $otpRepo;
+        $this->userRepo = $userRepo;
     }
 
-    // Send OTP for password reset
+    /**
+     * Send OTP for Forgot Password
+     */
     public function sendResetOtp(ForgotPasswordRequest $request)
     {
         $user = $this->otpRepo->findUsersByLogin($request->email);
 
-        if (!$user) {
-            return response()->json(['status' => 'Error', 'message' => 'User not found.'], 404);
+        if (! $user) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => 'User not found.'
+            ], 404);
         }
 
-        // Generate OTP for forgot-password action
         $otp = $this->otpService->generateOtp($user);
 
-        // Dispatch job using user ID for reliability
+        // Dispatch email job
         ForgotPasswordJob::dispatch($user);
 
         return response()->json([
@@ -40,23 +51,27 @@ class ForgotPasswordController extends Controller
             'data' => [
                 'otp_code' => $otp,
                 'otp_expires_at' => $user->otp_expires_at,
-            ],
+            ]
         ]);
     }
 
-    // Resend OTP
+    /**
+     * Resend Forgot Password OTP
+     */
     public function resendResetOtp(ForgotPasswordRequest $request)
     {
         $user = $this->otpRepo->findUsersByLogin($request->email);
 
-        if (!$user) {
-            return response()->json(['status' => 'Error', 'message' => 'User not found.'], 404);
+        if (! $user) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => 'User not found.'
+            ], 404);
         }
 
-        // Resend OTP
-        $otp = $this->otpService->resendOtp($user, 'forgot_password');
+        // Resend OTP (no action_type required because your service signature is simple)
+        $otp = $this->otpService->resendOtp($user);
 
-        // Dispatch job using user ID
         ForgotPasswordJob::dispatch($user);
 
         return response()->json([
@@ -65,7 +80,48 @@ class ForgotPasswordController extends Controller
             'data' => [
                 'otp_code' => $otp,
                 'otp_expires_at' => $user->otp_expires_at,
-            ],
+            ]
+        ]);
+    }
+
+    /**
+     * Verify Forgot Password OTP + Generate Reset Token
+     */
+    public function sendResetOtpVerify(ForgotPasswordRequest $request)
+    {
+        $user = $this->otpRepo->findUsersByLogin($request->email);
+
+        if (! $user) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        // Verify OTP
+        $isVerify = $this->otpService->verifyOtp($user, $request->otp_code);
+
+        if (! $isVerify) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => 'Invalid or expired OTP.'
+            ], 422);
+        }
+
+        // Generate reset token
+        $resetToken = Str::random(60);
+        $tokenExpiresAt = now()->addMinutes(10);
+
+
+        $this->userRepo->resetPasswordToken($user, $resetToken,$tokenExpiresAt);
+
+        return response()->json([
+            'status' => 'Success',
+            'message' => 'OTP verified successfully. Use the token to reset password.',
+            'data' => [
+                'reset_token' => $resetToken,
+                'reset_token_expires_at' => $tokenExpiresAt,
+            ]
         ]);
     }
 }
