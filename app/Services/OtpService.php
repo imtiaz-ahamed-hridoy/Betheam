@@ -40,8 +40,10 @@ class OtpService
 
     }
 
-    public function verifyOtp(User $user, string $otp )
+    public function verifyOtp(User $user,  $otp )
     {
+
+        
         if(!$user->otp_code || $user->otp_code !== $otp ||now()->greaterThan($user->otp_expires_at) ){
             return false;
         }
