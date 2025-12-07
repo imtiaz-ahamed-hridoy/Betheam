@@ -2,11 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
-class ForgotPasswordRequest extends FormRequest
+class ForgotOtpVerifyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,14 +23,7 @@ class ForgotPasswordRequest extends FormRequest
     {
         return [
             'email' => 'required|email|exists:users,email',
+            'otp_code' => 'required|string|max:4',
         ];
-    }
-
-    public function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(response()->json([
-            'status' => 'Error',
-            'errors' => $validator->errors(),
-        ], 422));
     }
 }
