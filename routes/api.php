@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AUTH\{ForgotPasswordController, LoginController, LogoutController, OtpController, ResetPasswordController};
 use App\Http\Controllers\API\Auth\RegisterController;
+use App\Http\Controllers\API\BokunController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -19,7 +20,10 @@ Route::post('/forgot-password/otp/resend', [ForgotPasswordController::class, 're
 Route::post('/forgot-password/otp/verify', [ForgotPasswordController::class, 'sendResetOtpVerify']);
 Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
 
+// Bokun API Routes
 
+// Route::post('/bokun/request', [BokunController::class, 'handle']);
 
-
+Route::get('/bokun/active-products', [BokunController::class, 'checkActiveProducts']);
+Route::post('/bokun/request', [BokunController::class, 'handle']);
 
